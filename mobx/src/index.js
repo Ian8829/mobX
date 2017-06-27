@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import observable from 'mobx';
 import { observer } from 'mobx-react';
 import ReactDOM from 'react-dom';
+// const Devtools = mobxDevtools.default;
 
 const appState = observable({
   count: 0
