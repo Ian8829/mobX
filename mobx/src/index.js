@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
-import {observable, computed} from 'mobx';
-import { observer } from 'mobx-react';
 import ReactDOM from 'react-dom';
-import Devtools from 'mobxDevtools.default';
+// import {observable, computed, action, transaction, useStrict} from 'mobx';
+// import { observer } from 'mobx-react';
+// import Devtools from 'mobxDevtools.default';
+
+
+const {observable, computed, action, transaction, useStrict} = mobx;
+const {observer} = mobxReact;
+// const DevTools = mobxDevtools.default;
+
+useStrict(true);
 
 const t = new class Temperature {
   @observable unit = "C";
@@ -29,15 +36,23 @@ const t = new class Temperature {
         return `${this.temperatureCelsius} C`;
     }
   }
+
+  @action set Unit(newUnit) {
+    this.unit = newUnit;
+  }
+
+  @action set Celsius(degrees) {
+    this.temperatureCelsius = degrees;
+  }
 };
 
 const App = observer(({ temperature }) => (
   <div>
     {temperature.temperature}
-    <DevTools/>
+    {/*<DevTools/>*/}
   </div>
 ));
 
 ReactDOM.render(
   <App temperature={t}/>,
-  document.querySelector('#root'));
+  document.querySelector('#app'));
