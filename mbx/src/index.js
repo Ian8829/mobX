@@ -1,5 +1,5 @@
 import {observable, computed, action} from 'mobx';
-import {observer} from 'mobx-react';
+import {observer, Provider} from 'mobx-react';
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 // const DevTools = mobxDevTools.default;
@@ -8,9 +8,10 @@ class Temperature {
   id = Math.random();
   @observable unit = 'C';
   @observable temperatureCelsius = 25;
+  @observable location = "Amsterdam, NL";
 
-  constructor(degrees, unit) {
-    this.setTemperatureAndUnit(degrees, unit)
+  constructor(location) {
+    this.location = location;
   }
 
   @computed get temperatureKelvin() {
@@ -51,26 +52,54 @@ class Temperature {
   }
 }
 
-const temps = observable([]);
-temps.push(new Temperature(20, "K"));
-temps.push(new Temperature(25, "F"));
-temps.push(new Temperature(20, "C"));
+const App = observer(
+  ["temperatures"],
+  ({ temperatures }) => (
+    <ul>
+      <TemperatureInput />
+      {temperatures.map(t =>
+        <TView key={t.id} temperature={t} />
+      )}
+    </ul>
+  )
+);
 
-const App = observer(({ temperatures }) => (
-  <ul>
-    {temperatures.map(t =>
-      <TView key={t.id} temperature={t} />
-    )}
-    {/*<DevTools />*/}
-  </ul>
-));
+@observer(["temperatures"])
+class TemperatureInput extends Component {
+  @observable input = "";
+
+  render() {
+    return(
+      <li>
+        Destination
+        <input
+          onChange={this.onChange}
+          value={this.input}
+        />
+        <button onClick={this.onSubmit}>Add</button>
+      </li>
+    );
+  }
+
+  @action onChange = e => {
+    this.input = e.target.value
+  };
+
+  @action onSubmit = () => {
+    this.props.temperatures.push(
+      new Temperature(this.input)
+    );
+    this.input = "";
+  }
+}
 
 @observer class TView extends Component {
   render() {
     const t = this.props.temperature;
     return (
       <li onClick={this.onTemperatureClick}>
-        {t.temperature}
+        {t.location}:
+        {t.loading ? "loading..." : t.temperature}
       </li>
     );
   }
@@ -80,7 +109,11 @@ const App = observer(({ temperatures }) => (
   }
 }
 
+const temps = observable([]);
+
 ReactDOM.render(
-  <App temperatures={temps} />,
+  <Provider temperatures={temps}>
+    <App temperatures={temps} />
+  </Provider>,
   document.querySelector('#root')
 );
